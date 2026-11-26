@@ -19,3 +19,5 @@ as source text. Submit `MyList.hpp` using the client's `--source-file` option.
   self-linking, copying, moving, and boundary cuts; ASan and UBSan passed.
 - Submission 879524: compile error because the judge interpreted the Git URL
   as C++ source. No class implementation error was reported.
+- Submission 879527: 75/100; the complex test exceeded its time limit.
+  Added a cached traversal cursor to accelerate nearby indexed operations.

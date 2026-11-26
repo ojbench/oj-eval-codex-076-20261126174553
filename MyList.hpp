@@ -15,15 +15,28 @@ class MyList {
     Node *head_ = nullptr;
     Node *tail_ = nullptr;
     int size_ = 0;
+    mutable Node *cursor_ = nullptr;
+    mutable int cursor_index_ = 0;
 
     Node *node_at(int index) const {
-        if (index < size_ / 2) {
-            Node *p = head_;
-            while (index--) p = p->next;
-            return p;
+        Node *p = head_;
+        int position = 0;
+        int distance = index;
+        if (size_ - 1 - index < distance) {
+            p = tail_;
+            position = size_ - 1;
+            distance = position - index;
         }
-        Node *p = tail_;
-        for (int i = size_ - 1; i > index; --i) p = p->prev;
+        int cursor_distance = cursor_index_ > index ? cursor_index_ - index
+                                                   : index - cursor_index_;
+        if (cursor_ && cursor_distance < distance) {
+            p = cursor_;
+            position = cursor_index_;
+        }
+        while (position < index) { p = p->next; ++position; }
+        while (position > index) { p = p->prev; --position; }
+        cursor_ = p;
+        cursor_index_ = index;
         return p;
     }
 
@@ -59,6 +72,8 @@ public:
         swap(head_, obj.head_);
         swap(tail_, obj.tail_);
         swap(size_, obj.size_);
+        swap(cursor_, obj.cursor_);
+        swap(cursor_index_, obj.cursor_index_);
     }
     void push_back(const ValueType &value) {
         Node *p = new Node(value);
@@ -70,6 +85,7 @@ public:
     }
     void push_front(const ValueType &value) {
         Node *p = new Node(value);
+        if (cursor_) ++cursor_index_;
         p->next = head_;
         if (head_) head_->prev = p;
         else tail_ = p;
@@ -78,6 +94,7 @@ public:
     }
     void pop_back() {
         Node *p = tail_;
+        if (cursor_ == p) cursor_ = nullptr;
         tail_ = p->prev;
         if (tail_) tail_->next = nullptr;
         else head_ = nullptr;
@@ -86,6 +103,8 @@ public:
     }
     void pop_front() {
         Node *p = head_;
+        if (cursor_ == p) cursor_ = nullptr;
+        else if (cursor_) --cursor_index_;
         head_ = p->next;
         if (head_) head_->prev = nullptr;
         else tail_ = nullptr;
@@ -106,6 +125,8 @@ public:
         p->next = next;
         next->prev->next = p;
         next->prev = p;
+        cursor_ = p;
+        cursor_index_ = index;
         ++size_;
     }
     void erase(int index) {
@@ -114,6 +135,8 @@ public:
         Node *p = node_at(index);
         p->prev->next = p->next;
         p->next->prev = p->prev;
+        cursor_ = p->next;
+        cursor_index_ = index;
         delete p;
         --size_;
     }
@@ -125,6 +148,7 @@ public:
         }
         tail_ = nullptr;
         size_ = 0;
+        cursor_ = nullptr;
     }
     void link(const MyList &obj) {
         // Copy first so self-linking is finite and allocation failure is atomic.
@@ -155,6 +179,7 @@ public:
         tail_->next = nullptr;
         result.head_->prev = nullptr;
         size_ = index;
+        cursor_ = nullptr;
         return result;
     }
 };
