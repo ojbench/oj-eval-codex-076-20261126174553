@@ -2,6 +2,46 @@
 #define MY_LIST_HPP
 
 #include <utility>
+#include <cstddef>
+#include <memory>
+#include <vector>
+
+namespace my_list_detail {
+template <typename T>
+class NodePool {
+    union Slot {
+        alignas(T) unsigned char storage[sizeof(T)];
+        Slot *next;
+    };
+    std::vector<std::unique_ptr<Slot[]>> blocks_;
+    Slot *free_ = nullptr;
+public:
+    static NodePool &instance() {
+        static NodePool pool;
+        return pool;
+    }
+    void *allocate() {
+        if (!free_) {
+            constexpr int block_size = 4096;
+            auto block = std::make_unique<Slot[]>(block_size);
+            Slot *first = block.get();
+            blocks_.push_back(std::move(block));
+            for (int i = 0; i < block_size - 1; ++i)
+                first[i].next = first + i + 1;
+            first[block_size - 1].next = nullptr;
+            free_ = first;
+        }
+        Slot *slot = free_;
+        free_ = slot->next;
+        return slot;
+    }
+    void release(void *pointer) noexcept {
+        Slot *slot = static_cast<Slot *>(pointer);
+        slot->next = free_;
+        free_ = slot;
+    }
+};
+}
 
 template <typename ValueType>
 class MyList {
@@ -10,6 +50,12 @@ class MyList {
         Node *prev = nullptr;
         Node *next = nullptr;
         explicit Node(const ValueType &v) : value(v) {}
+        static void *operator new(std::size_t) {
+            return my_list_detail::NodePool<Node>::instance().allocate();
+        }
+        static void operator delete(void *p) noexcept {
+            my_list_detail::NodePool<Node>::instance().release(p);
+        }
     };
 
     Node *head_ = nullptr;

@@ -21,3 +21,7 @@ as source text. Submit `MyList.hpp` using the client's `--source-file` option.
   as C++ source. No class implementation error was reported.
 - Submission 879527: 75/100; the complex test exceeded its time limit.
   Added a cached traversal cursor to accelerate nearby indexed operations.
+- Submission 879530: 75/100; traversal caching had little impact on runtime.
+  Added a per-type block allocator with recycled node storage to reduce
+  allocation overhead. Storage is released at program exit; values are
+  destroyed immediately when their nodes are removed.
