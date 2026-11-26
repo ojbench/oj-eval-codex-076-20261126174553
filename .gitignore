@@ -1,0 +1,8 @@
+.env
+.acmoj_token
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+code
+build/
