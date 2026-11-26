@@ -4,7 +4,8 @@
 Endpoint operations, size queries and moves take constant time. Indexed
 operations walk from the nearer endpoint. Copying and linking take linear time
 in the source size. Cutting locates the boundary then transfers nodes without
-copying values. Each list uses linear space and owns its nodes exclusively.
+copying values. Each list owns its nodes exclusively. The shared per-type pool
+retains storage proportional to the peak number of simultaneously live nodes.
 
 The CMake target `code` runs the randomized local test driver. Build with
 `cmake -S . -B build && cmake --build build`, then run `build/code`.
@@ -25,3 +26,5 @@ as source text. Submit `MyList.hpp` using the client's `--source-file` option.
   Added a per-type block allocator with recycled node storage to reduce
   allocation overhead. Storage is released at program exit; values are
   destroyed immediately when their nodes are removed.
+- Submission 879532: Accepted, 100/100 across all six groups. The complex test
+  took 2,881 ms out of 3,000 ms. Four submissions were used in total.
