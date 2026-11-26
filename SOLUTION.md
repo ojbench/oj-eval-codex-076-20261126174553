@@ -1,0 +1,21 @@
+# MyList
+
+`MyList.hpp` implements the requested class using an owning doubly linked list.
+Endpoint operations, size queries and moves take constant time. Indexed
+operations walk from the nearer endpoint. Copying and linking take linear time
+in the source size. Cutting locates the boundary then transfers nodes without
+copying values. Each list uses linear space and owns its nodes exclusively.
+
+The CMake target `code` runs the randomized local test driver. Build with
+`cmake -S . -B build && cmake --build build`, then run `build/code`.
+
+The live problem uses a class-only harness that includes submitted text as
+`src.hpp`. Despite advertising Git submissions, it treats the repository URL
+as source text. Submit `MyList.hpp` using the client's `--source-file` option.
+
+## Validation and submissions
+
+- 20,000 randomized operations checked against `std::vector`, including
+  self-linking, copying, moving, and boundary cuts; ASan and UBSan passed.
+- Submission 879524: compile error because the judge interpreted the Git URL
+  as C++ source. No class implementation error was reported.
